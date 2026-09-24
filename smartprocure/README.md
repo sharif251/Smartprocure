@@ -53,13 +53,3 @@ pytest
 
 
 ---
-
-### How to update it in Termux:
-
-Run these 3 commands in Termux to save and push the `README.md` update to GitHub:
-
-```bash
-git add README.md
-git commit -m "docs: add complete project README"
-git push
-

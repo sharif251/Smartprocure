@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartProcure Engine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #09090b; }
+        .font-mono { font-family: 'Geist Mono', monospace; }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+    </style>
+</head>
+<body class="text-zinc-100 antialiased min-h-screen pb-16 selection:bg-zinc-800 selection:text-zinc-200">
+
+    <!-- Toast Notification Container -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 ease-out font-mono text-xs px-4 py-3 rounded-lg border shadow-2xl flex items-center space-x-2 bg-zinc-900 border-zinc-800 text-zinc-200">
+        <span id="toastIcon"></span>
+        <span id="toastMsg">Notification message</span>
+    </div>
+
+    <!-- Top Navigation Header -->
+    <header class="border-b border-zinc-800/80 bg-zinc-950/50 backdrop-blur sticky top-0 z-40 px-6 py-4">
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                <span class="font-semibold tracking-tight text-sm text-zinc-200 font-mono">SMARTPROCURE<span class="text-zinc-600">/v1.0</span></span>
+            </div>
+
+            <!-- Page Navigation Tabs -->
+            <nav class="flex items-center bg-zinc-900 border border-zinc-800 p-1 rounded-lg font-mono text-xs">
+                <button id="navControl" onclick="switchPage('control')" class="px-3 py-1.5 rounded-md text-zinc-100 bg-zinc-800 font-medium transition-all">
+                    01. Control Panel
+                </button>
+                <button id="navReport" onclick="switchPage('report')" class="px-3 py-1.5 rounded-md text-zinc-400 hover:text-zinc-200 transition-all">
+                    02. Allocation Report
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-6 pt-10">
+
+        <!-- PAGE 1: CONTROL PANEL -->
+        <div id="pageControl" class="space-y-10">
+            <div class="space-y-1">
+                <h1 class="text-xl font-medium tracking-tight text-zinc-100">Procurement Setup</h1>
+                <p class="text-sm text-zinc-400 font-normal">Register active suppliers and configure target constraints.</p>
+            </div>
+
+            <!-- Input Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                
+                <!-- Panel 1: Register Supplier -->
+                <div class="bg-zinc-900/40 border border-zinc-800/80 rounded-xl p-6 space-y-5">
+                    <div class="flex items-center justify-between border-b border-zinc-800/60 pb-3">
+                        <span class="text-xs font-mono font-medium text-zinc-400 tracking-wider uppercase">01 // Register Supplier</span>
+                        <span class="text-[10px] font-mono text-zinc-500">DATABASE WRITE</span>
+                    </div>
+
+                    <form id="vendorForm" class="space-y-4">
+                        <div class="space-y-1.5">
+                            <label class="block text-xs font-medium text-zinc-400">Vendor Name</label>
+                            <input type="text" id="vName" required class="w-full bg-zinc-950/80 border border-zinc-800 rounded-lg px-3.5 py-2 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 transition-all" placeholder="e.g. Sharif Group Ltd">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3 items-end">
+                            <div class="space-y-1.5">
+                                <label class="block text-xs font-medium text-zinc-400">Unit Cost ($)</label>
+                                <input type="number" step="0.01" id="vPrice" required class="w-full bg-zinc-950/80 border border-zinc-800 rounded-lg px-3.5 py-2 text-sm font-mono text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 transition-all" placeholder="85.00">
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="block text-xs font-medium text-zinc-400">Lead Time (Days)</label>
+                                <input type="number" id="vSpeed" required class="w-full bg-zinc-950/80 border border-zinc-800 rounded-lg px-3.5 py-2 text-sm font-mono text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 transition-all" placeholder="5">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3 items-end">
+                            <div class="space-y-1.5">
+                                <label class="block text-xs font-medium text-zinc-400">Defect Rate (0.01 = 1%)</label>
+                                <input type="number" step="0.001" id="vDefect" required class="w-full bg-zinc-950/80 border border-zinc-800 rounded-lg px-3.5 py-2 text-sm font-mono text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 transition-all" placeholder="0.02">
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="block text-xs font-medium text-zinc-400">Stock Capacity</label>
+                                <input type="number" id="vCap" required class="w-full bg-zinc-950/80 border border-zinc-800 rounded-lg px-3.5 py-2 text-sm font-mono text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 transition-all" placeholder="500">
+                            </div>
+                        </div>
+
+                        <button type="submit" id="saveBtn" class="w-full bg-zinc-100 hover:bg-white text-zinc-950 font-medium py-2.5 rounded-lg text-sm transition-all duration-150 active:scale-[0.99]">
+                            Save Supplier to Database
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Panel 2: Execute Optimization -->
+                <div class="bg-zinc-900/40 border border-zinc-800/80 rounded-xl p-6 space-y-5">
+                    <div class="flex items-center justify-between border-b border-zinc-800/60 pb-3">
+                        <span class="text-xs font-mono font-medium text-zinc-400 tracking-wider uppercase">02 // Optimization Constraints</span>
+                        <span class="text-[10px] font-mono text-zinc-500">ENGINE EXECUTE</span>
+                    </div>
+
+                    <form id="optForm" class="space-y-4">
+                        <div class="space-y-1.5">
+                            <label class="block text-xs font-medium text-zinc-400">Target Order Volume (Units)</label>
+                            <input type="number" id="reqQty" required class="w-full bg-zinc-950/80 border border-zinc-800 rounded-lg px-3.5 py-2 text-sm font-mono text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 transition-all" placeholder="400">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3 items-end">
+                            <div class="space-y-1.5">
+                                <label class="block text-xs font-medium text-zinc-400">Max Budget / Unit ($)</label>
+                                <input type="number" step="0.01" id="maxBudget" required class="w-full bg-zinc-950/80 border border-zinc-800 rounded-lg px-3.5 py-2 text-sm font-mono text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 transition-all" placeholder="100.00">
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="block text-xs font-medium text-zinc-400">Max Delivery (Days)</label>
+                                <input type="number" id="maxDays" required class="w-full bg-zinc-950/80 border border-zinc-800 rounded-lg px-3.5 py-2 text-sm font-mono text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 transition-all" placeholder="10">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2.5 rounded-lg text-sm transition-all duration-150 active:scale-[0.99] flex items-center justify-center space-x-2">
+                            <span>Run Optimization & View Report →</span>
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+
+            <!-- Inventory List -->
+            <div class="bg-zinc-900/40 border border-zinc-800/80 rounded-xl p-6 space-y-4">
+                <div class="flex items-center justify-between border-b border-zinc-800/60 pb-3">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-xs font-mono font-medium text-zinc-400 tracking-wider uppercase">Active Database Inventory</span>
+                        <span id="vendorCountBadge" class="font-mono text-[10px] px-2 py-0.5 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-400">0 Suppliers</span>
+                    </div>
+                    <button onclick="loadVendors()" class="text-xs font-mono text-zinc-500 hover:text-zinc-300 transition-colors">↻ Refresh</button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm font-mono">
+                        <thead>
+                            <tr class="border-b border-zinc-800 text-xs text-zinc-500 uppercase tracking-wider">
+                                <th class="py-2.5 px-3 font-normal">ID</th>
+                                <th class="py-2.5 px-3 font-normal">Supplier Name</th>
+                                <th class="py-2.5 px-3 font-normal">Unit Cost</th>
+                                <th class="py-2.5 px-3 font-normal">Lead Time</th>
+                                <th class="py-2.5 px-3 font-normal">Defect Rate</th>
+                                <th class="py-2.5 px-3 font-normal">Max Stock</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vendorListTable" class="divide-y divide-zinc-800/50 text-zinc-300">
+                            <tr><td colspan="6" class="py-4 px-3 text-center text-zinc-600 text-xs">No suppliers registered in database yet.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE 2: ALLOCATION REPORT -->
+        <div id="pageReport" class="hidden space-y-8">
+            <div class="flex items-center justify-between">
+                <div class="space-y-1">
+                    <h1 class="text-xl font-medium tracking-tight text-zinc-100">Optimization Report</h1>
+                    <p class="text-sm text-zinc-400 font-normal">Mathematical allocation plan generated by SmartProcure Engine.</p>
+                </div>
+                <button onclick="switchPage('control')" class="text-xs font-mono text-zinc-400 hover:text-zinc-100 border border-zinc-800 bg-zinc-900 px-3 py-1.5 rounded-lg transition-all">
+                    ← Back to Setup
+                </button>
+            </div>
+
+            <!-- Report Results View -->
+            <div id="noReportState" class="bg-zinc-900/40 border border-zinc-800/80 rounded-xl p-12 text-center space-y-3">
+                <p class="text-sm text-zinc-400 font-mono">No allocation report generated yet.</p>
+                <p class="text-xs text-zinc-600">Go to 01. Control Panel and click "Run Optimization" to view results here.</p>
+            </div>
+
+            <div id="reportCard" class="hidden space-y-6">
+                
+                <!-- Metrics Summary Bar -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-zinc-900/40 border border-zinc-800/80 p-4 rounded-xl space-y-1">
+                        <span class="text-[10px] font-mono text-zinc-500 uppercase">Allocation Status</span>
+                        <div id="summaryStatus" class="text-base font-semibold text-emerald-400 font-mono">SUCCESS</div>
+                    </div>
+                    <div class="bg-zinc-900/40 border border-zinc-800/80 p-4 rounded-xl space-y-1">
+                        <span class="text-[10px] font-mono text-zinc-500 uppercase">Fulfilled Volume</span>
+                        <div id="summaryUnits" class="text-base font-semibold text-zinc-100 font-mono">0 / 0 Units</div>
+                    </div>
+                    <div class="bg-zinc-900/40 border border-zinc-800/80 p-4 rounded-xl space-y-1">
+                        <span class="text-[10px] font-mono text-zinc-500 uppercase">Total Investment</span>
+                        <div id="summaryCost" class="text-base font-semibold text-emerald-400 font-mono">$0.00</div>
+                    </div>
+                </div>
+
+                <!-- Main Allocation Table -->
+                <div class="bg-zinc-900/40 border border-zinc-800/80 rounded-xl p-6 space-y-4">
+                    <div class="flex items-center justify-between border-b border-zinc-800/60 pb-3">
+                        <span class="text-xs font-mono font-medium text-zinc-400 tracking-wider uppercase">Supplier Purchase Orders</span>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm font-mono">
+                            <thead>
+                                <tr class="border-b border-zinc-800 text-xs text-zinc-500 uppercase tracking-wider">
+                                    <th class="py-2.5 px-3 font-normal">Supplier</th>
+                                    <th class="py-2.5 px-3 font-normal">Allocated Units</th>
+                                    <th class="py-2.5 px-3 font-normal">Unit Price</th>
+                                    <th class="py-2.5 px-3 font-normal">Total Spend</th>
+                                    <th class="py-2.5 px-3 font-normal">Lead Time</th>
+                                    <th class="py-2.5 px-3 font-normal">Penalty Score</th>
+                                </tr>
+                            </thead>
+                            <tbody id="resultsTable" class="divide-y divide-zinc-800/50 text-zinc-300"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // Page Switcher Function
+        function switchPage(page) {
+            const pageControl = document.getElementById('pageControl');
+            const pageReport = document.getElementById('pageReport');
+            const navControl = document.getElementById('navControl');
+            const navReport = document.getElementById('navReport');
+
+            if (page === 'control') {
+                pageControl.classList.remove('hidden');
+                pageReport.classList.add('hidden');
+                navControl.className = 'px-3 py-1.5 rounded-md text-zinc-100 bg-zinc-800 font-medium transition-all';
+                navReport.className = 'px-3 py-1.5 rounded-md text-zinc-400 hover:text-zinc-200 transition-all';
+            } else {
+                pageControl.classList.add('hidden');
+                pageReport.classList.remove('hidden');
+                navReport.className = 'px-3 py-1.5 rounded-md text-zinc-100 bg-zinc-800 font-medium transition-all';
+                navControl.className = 'px-3 py-1.5 rounded-md text-zinc-400 hover:text-zinc-200 transition-all';
+            }
+        }
+
+        // Custom Toast Notification System
+        function showToast(msg, isError = false) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMsg');
+            const toastIcon = document.getElementById('toastIcon');
+
+            toastMsg.innerText = msg;
+            toastIcon.innerText = isError ? '✕' : '✓';
+            toast.className = `fixed bottom-5 right-5 z-50 transform translate-y-0 opacity-100 transition-all duration-300 ease-out font-mono text-xs px-4 py-3 rounded-lg border shadow-2xl flex items-center space-x-2 ${
+                isError 
+                ? 'bg-rose-950/90 border-rose-800 text-rose-200' 
+                : 'bg-emerald-950/90 border-emerald-800 text-emerald-200'
+            }`;
+
+            setTimeout(() => {
+                toast.className = 'fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 ease-out font-mono text-xs px-4 py-3 rounded-lg border shadow-2xl flex items-center space-x-2 bg-zinc-900 border-zinc-800 text-zinc-200';
+            }, 3000);
+        }
+
+        // Fetch and display all registered vendors
+        async function loadVendors() {
+            try {
+                const res = await fetch('/api/v1/vendors');
+                const vendors = await res.json();
+                const table = document.getElementById('vendorListTable');
+                const badge = document.getElementById('vendorCountBadge');
+
+                badge.innerText = `${vendors.length} Suppliers`;
+
+                if (vendors.length === 0) {
+                    table.innerHTML = '<tr><td colspan="6" class="py-4 px-3 text-center text-zinc-600 text-xs">No suppliers registered in database yet.</td></tr>';
+                    return;
+                }
+
+                table.innerHTML = vendors.map(v => `
+                    <tr class="hover:bg-zinc-800/20 transition-colors">
+                        <td class="py-2.5 px-3 text-zinc-500">#${v.id}</td>
+                        <td class="py-2.5 px-3 font-sans font-medium text-zinc-100">${v.name}</td>
+                        <td class="py-2.5 px-3 text-zinc-300">$${v.unit_price}</td>
+                        <td class="py-2.5 px-3 text-zinc-400">${v.lead_time_days} days</td>
+                        <td class="py-2.5 px-3 text-zinc-400">${(v.defect_rate * 100).toFixed(1)}%</td>
+                        <td class="py-2.5 px-3 text-zinc-300">${v.max_capacity} units</td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                console.error('Failed to load vendors', err);
+            }
+        }
+
+        // Submit New Supplier Form
+        document.getElementById('vendorForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const saveBtn = document.getElementById('saveBtn');
+            saveBtn.disabled = true;
+
+            const payload = {
+                name: document.getElementById('vName').value,
+                unit_price: parseFloat(document.getElementById('vPrice').value),
+                lead_time_days: parseInt(document.getElementById('vSpeed').value, 10),
+                defect_rate: parseFloat(document.getElementById('vDefect').value),
+                max_capacity: parseInt(document.getElementById('vCap').value, 10)
+            };
+
+            try {
+                const res = await fetch('/api/v1/vendors', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    showToast(`Supplier "${payload.name}" saved to database!`);
+                    document.getElementById('vendorForm').reset();
+                    loadVendors();
+                } else {
+                    showToast('Failed to save supplier: Check input values.', true);
+                }
+            } catch (error) {
+                showToast('Server connection error.', true);
+            } finally {
+                saveBtn.disabled = false;
+            }
+        });
+
+        // Submit Optimization Form -> Redirects to Page 2 automatically!
+        document.getElementById('optForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const qty = parseInt(document.getElementById('reqQty').value, 10);
+            const budget = parseFloat(document.getElementById('maxBudget').value);
+            const days = parseInt(document.getElementById('maxDays').value, 10);
+
+            try {
+                const res = await fetch(`/api/v1/procure/optimize?required_quantity=${qty}&max_budget_per_unit=${budget}&max_lead_time_days=${days}`, {
+                    method: 'POST'
+                });
+
+                const data = await res.json();
+                
+                if (!res.ok) {
+                    showToast(data.detail || 'Error running optimization.', true);
+                    return;
+                }
+
+                // Calculate grand total cost
+                const totalCost = data.allocation_plan.reduce((sum, item) => sum + item.total_cost, 0);
+
+                // Update Report Elements
+                document.getElementById('summaryStatus').innerText = data.status;
+                document.getElementById('summaryUnits').innerText = `${data.fulfilled_units} / ${qty} Units`;
+                document.getElementById('summaryCost').innerText = `$${totalCost.toLocaleString()}`;
+
+                const table = document.getElementById('resultsTable');
+                table.innerHTML = data.allocation_plan.map(item => `
+                    <tr class="hover:bg-zinc-800/30 transition-colors">
+                        <td class="py-3 px-3 font-sans font-medium text-zinc-100">${item.vendor_name}</td>
+                        <td class="py-3 px-3 text-zinc-200">${item.units_allocated}</td>
+                        <td class="py-3 px-3 text-zinc-400">$${item.unit_price}</td>
+                        <td class="py-3 px-3 text-emerald-400 font-medium">$${item.total_cost.toLocaleString()}</td>
+                        <td class="py-3 px-3 text-zinc-400">${item.lead_time_days}d</td>
+                        <td class="py-3 px-3 text-zinc-500">${item.score}</td>
+                    </tr>
+                `).join('');
+
+                // Toggle visibility
+                document.getElementById('noReportState').classList.add('hidden');
+                document.getElementById('reportCard').classList.remove('hidden');
+
+                // Auto-switch to Page 2 (Allocation Report)
+                switchPage('report');
+                showToast('Allocation report calculated and loaded!');
+            } catch (error) {
+                showToast('Server connection error.', true);
+            }
+        });
+
+        // Initial Load
+        loadVendors();
+    </script>
+</body>
+</html>
